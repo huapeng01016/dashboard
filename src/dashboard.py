@@ -28,22 +28,25 @@ from pystata import stata
 from dash import Dash, html, dcc, Input, Output, dash_table
 app = Dash()
 
-geo_dropdown = dcc.Dropdown(options=auto['foreign'].unique(), value='ALL')
+geo_dropdown = dcc.Dropdown(['All', 'Domestic', 'Foreign'], value='All')
 
 app.layout = html.Div(children=[
         html.H1(children='Stata Auto Dataset Dashboard'),
         geo_dropdown,
 
 
-        dash_table.DataTable(id='data_table'),
+        dash_table.DataTable(id='data_table', 
+                             page_size=10),
 
         dcc.Graph(id='fig_1'),
 
-        dcc.Graph(id='fig_2'),
+        # dcc.Graph(id='fig_2'),
 
         html.Iframe(
             id="regress-output",
             src="assets/tt3.html",
+            width="100%",
+            style={"border" : "0"},
             ),        
 ])
 
@@ -52,60 +55,64 @@ app.layout = html.Div(children=[
     Output(component_id='data_table', component_property='data'),
     Output(component_id='data_table', component_property='columns'),
     Output(component_id='fig_1', component_property='figure'),
-    Output(component_id='fig_2', component_property='figure'),
+    # Output(component_id='fig_2', component_property='figure'),
     Output(component_id='regress-output', component_property='src'), 
     Input(component_id=geo_dropdown, component_property='value')
 )
 
 def update_graph(selected_geography):
-    if selected_geography == "ALL":
+    if selected_geography == "All":
         filtered_auto = auto
     else:
         filtered_auto = auto[auto['foreign'] == selected_geography]
     
-    data = filtered_auto.to_dict(orient='records')
-    columns = [{'name': col, 'id': col} for col in filtered_auto.columns]
     
+    filtered_auto["rep78"] = filtered_auto["rep78"].astype(str)
     fig_1 = px.scatter(filtered_auto,
                        x='price', y='mpg',
                        color='rep78',
-                       title='Auto Prices in {selected_geography}')
+                       category_orders={"rep78": np.sort(filtered_auto["rep78"].unique())},
+                       title='Auto Prices in selected geography')
+    filtered_auto["rep78"] = filtered_auto["rep78"].astype(float)
 
-    if selected_geography == "Foreign":
-        stata.run('''
-              sysuse auto, clear
-              scatter mpg price if foreign
-              graph export sc1.png, replace
-              ''')
+    data = filtered_auto.to_dict(orient='records')
+    columns = [{'name': col, 'id': col} for col in filtered_auto.columns]
 
-        try:
-            img = np.array(Image.open("C:/stata/talks/dashboard/src/sc1.png"))
-        except OSError:
-            raise PreventUpdate
-    elif selected_geography == "Domestic":
-        stata.run('''
-              sysuse auto, clear
-              scatter mpg price if !foreign
-              graph export sc2.png, replace
-              ''')
+    # if selected_geography == "Foreign":
+    #     stata.run('''
+    #           sysuse auto, clear
+    #           scatter mpg price if foreign
+    #           graph export sc1.png, replace
+    #           ''')
+
+    #     try:
+    #         img = np.array(Image.open("C:/stata/talks/dashboard/src/sc1.png"))
+    #     except OSError:
+    #         raise PreventUpdate
+    # elif selected_geography == "Domestic":
+    #     stata.run('''
+    #           sysuse auto, clear
+    #           scatter mpg price if !foreign
+    #           graph export sc2.png, replace
+    #           ''')
     
-        try:
-            img = np.array(Image.open("C:/stata/talks/dashboard/src/sc2.png"))
-        except OSError:
-            raise PreventUpdate
-    else:
-        stata.run('''
-              sysuse auto, clear
-              scatter price mpg 
-              graph export sc3.png, replace
-              ''')
+    #     try:
+    #         img = np.array(Image.open("C:/stata/talks/dashboard/src/sc2.png"))
+    #     except OSError:
+    #         raise PreventUpdate
+    # else:
+    #     stata.run('''
+    #           sysuse auto, clear
+    #           scatter price mpg 
+    #           graph export sc3.png, replace
+    #           ''')
     
-        try:
-            img = np.array(Image.open("C:/stata/talks/dashboard/src/sc3.png"))
-        except OSError:
-            raise PreventUpdate
+    #     try:
+    #         img = np.array(Image.open("C:/stata/talks/dashboard/src/sc3.png"))
+    #     except OSError:
+    #         raise PreventUpdate
             
-    fig_2 = px.imshow(img, color_continuous_scale="gray")
+    # fig_2 = px.imshow(img, color_continuous_scale="gray")
 
     if selected_geography == "Foreign":
         stata.run('''
@@ -135,7 +142,8 @@ def update_graph(selected_geography):
               
         src = "assets/tt3.html"
     
-    return [data, columns, fig_1, fig_2, src]
+    # return [data, columns, fig_1, fig_2, src]
+    return data, columns, fig_1, src
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
