@@ -1,0 +1,53 @@
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" type="text/css" href="stmarkdown.css">
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript" async
+  src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_CHTML">
+</script>
+</head>
+<h1><a href="#statapython-intergration" id="statapython-intergration">Stata/Python intergration</a></h1>
+<p>Stata provides two ways for Python and Stata to interact, and we refer to these mechanisms collectively as PyStata.</p>
+<h2><a href="#use-python-within-stata-stata-16" id="use-python-within-stata-stata-16">Use Python within Stata  - Stata 16</a></h2>
+<p>Python can be invoked from a running Stata session so that Python&rsquo;s extensive language features can be leveraged from within Stata.</p>
+<h2><a href="#use-stata-from-python-stata-17" id="use-stata-from-python-stata-17">Use Stata from Python  - Stata 17</a></h2>
+<p>Stata can be invoked from a standalone Python environment via the pystata Python package. It includes three IPython (interactive Python) magic commands and a suite of API functions for interacting with Stata.</p>
+<ul>
+<li>
+<p><a href="https://www.stata.com/python/pystata/install.html#method-1-installing-via-pip">Configure stata</a></p>
+</li>
+<li>
+<p><a href="https://www.stata.com/new-in-stata/jupyter-notebooks/">Use Stata in Jupyter</a></p>
+</li>
+<li>
+<p><a href="https://www.stata.com/python/api17/">Stata Python API</a></p>
+</li>
+</ul>
+<h2><a href="#use-stata-with-pythondash-to-generate-dashboard" id="use-stata-with-pythondash-to-generate-dashboard">Use Stata with Python/dash to generate dashboard</a></h2>
+<p><a href="./src/dashboard.py">An example</a></p>
+<h2><a href="#use-stata-to-generate-maps" id="use-stata-to-generate-maps">Use Stata to generate maps</a></h2>
+<ul>
+<li>spmap (grmap)</li>
+</ul>
+<pre><code>use ./data/covid19_adj, replace
+grmap, activate
+drop if province_state == &quot;Alaska&quot; | province_state == &quot;Hawaii&quot;
+spset, modify shpfile(usacounties_shp)
+grmap confirmed_adj, clnumber(7)
+</code></pre>
+<p><img src="map_ex0.svg" ></p>
+<ul>
+<li>maptile</li>
+</ul>
+<pre><code>sysuse census
+rename (state state2) (statename state)
+gen babyperc=poplt5/pop*100
+maptile babyperc, geo(state)
+</code></pre>
+<p><img src="map_ex1.svg" ></p>
+<ul>
+<li>Use Python</li>
+</ul>
+<p><img src="./images/fig1.svg"></p>
