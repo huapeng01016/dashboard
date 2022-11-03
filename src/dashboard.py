@@ -13,12 +13,13 @@ import numpy as np
 from dash.exceptions import PreventUpdate
 
 pio.renderers.default = 'browser'
-auto = pd.read_csv('../data/auto.csv')
 
 import stata_setup
 stata_setup.config("C:/Program Files/Stata17", "mp")
 from pystata import stata
 
+stata.run('sysuse auto, clear')
+auto = stata.pdataframe_from_data(valuelabel=True)
 
 
 # fig = px.scatter(df, x='mpg', y='price', color='foreign')
