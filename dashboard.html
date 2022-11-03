@@ -12,6 +12,15 @@
 <p>Stata provides two ways for Python and Stata to interact, and we refer to these mechanisms collectively as PyStata.</p>
 <h2><a href="#use-python-within-stata-stata-16" id="use-python-within-stata-stata-16">Use Python within Stata  - Stata 16</a></h2>
 <p>Python can be invoked from a running Stata session so that Python&rsquo;s extensive language features can be leveraged from within Stata.</p>
+<pre><code>. python:
+----------------------------------------------- python (type end to exit) -----
+&gt;&gt;&gt; print(&quot;Hello!&quot;)
+Hello!
+&gt;&gt;&gt; end
+-------------------------------------------------------------------------------
+
+</code></pre>
+<p><a href="https://blog.stata.com/2020/08/18/stata-python-integration-part-1-setting-up-stata-to-use-python/">Chuck&rsquo;s blog series</a></p>
 <h2><a href="#use-stata-from-python-stata-17" id="use-stata-from-python-stata-17">Use Stata from Python  - Stata 17</a></h2>
 <p>Stata can be invoked from a standalone Python environment via the pystata Python package. It includes three IPython (interactive Python) magic commands and a suite of API functions for interacting with Stata.</p>
 <ul>
@@ -38,6 +47,7 @@ spset, modify shpfile(usacounties_shp)
 grmap confirmed_adj, clnumber(7)
 </code></pre>
 <p><img src="map_ex0.svg" ></p>
+<p><a href="./src/covid19_ts.do">src</a></p>
 <ul>
 <li>maptile</li>
 </ul>
@@ -51,3 +61,24 @@ maptile babyperc, geo(state)
 <li>Use Python</li>
 </ul>
 <p><img src="./images/fig1.svg"></p>
+<p><a href="../src/covid19_py.do">src</a></p>
+<h1><a href="#3d-gif" id="3d-gif">3d gif</a></h1>
+<pre><code>stata.run('sysuse sandstone, clear')
+D = stata.nparray_from_data(&quot;northing easting depth&quot;)
+
+ax = plt.axes(projection='3d')
+plt.xticks(np.arange(60000, 90001, step=10000))
+plt.yticks(np.arange(30000, 50001, step=5000))
+ax.plot_trisurf(D[:,0], D[:,1], D[:,2], cmap=plt.cm.Spectral, edgecolor='none')
+
+for i in range(0, 360, 10):
+	ax.view_init(elev=10., azim=i)
+	plt.savefig(&quot;../gif/sandstone&quot;+str(i)+&quot;.png&quot;)
+	
+with io.get_writer('../gif/sandstone.gif', mode='I', duration=0.5) as writer:
+	for i in range(0, 360, 10):
+		image = io.imread(&quot;../gif/sandstone&quot;+str(i)+&quot;.png&quot;)
+		writer.append_data(image)
+writer.close()
+</code></pre>
+<p><img src="./gif/sandstone.gif"></p>

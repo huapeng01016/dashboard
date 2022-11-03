@@ -16,10 +16,9 @@ pio.renderers.default = 'browser'
 auto = pd.read_csv('../data/auto.csv')
 
 import stata_setup
-stata_setup.config("C:/Program Files/Stata17", "se")
+stata_setup.config("C:/Program Files/Stata17", "mp")
 from pystata import stata
 
-from pystata import stata
 
 
 # fig = px.scatter(df, x='mpg', y='price', color='foreign')
